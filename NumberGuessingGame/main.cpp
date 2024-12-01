@@ -53,12 +53,11 @@ void guessingGame(int level)
         }
         else if (guess < randomNumber){
             std::cout << "Incorrect! The number is greater than " << guess << ".\n";
-            numberOfTries--;
         }
         else {
             std::cout << "Incorrect! The number is less than " << guess << ".\n";
-            numberOfTries--;
         }
+        numberOfTries--;        // decrement number of tries
     }
 
     if (hasWon){
@@ -79,8 +78,7 @@ int main()
     std::cout << std::endl;
     
     int userChoice {};
-    do
-    {
+    while (true){
         std::cout << "Please select the difficulty level:\n";
         std::cout << "1. Easy (10 chances)\n";
         std::cout << "2. Medium (5 chances)\n";
@@ -90,9 +88,25 @@ int main()
         std::cout << "Enter your choice: ";
         std::cin >> userChoice;
         std::cout << std::endl;
-    } while (userChoice < 1 || userChoice > 3);
 
-    guessingGame(userChoice);
+        // check for valid input
+        if( userChoice > 3 || userChoice < 1) {
+            std::cout << "Invalid choice...\n";
+            std::cout << std::endl;
+            continue;
+        }
 
+        guessingGame(userChoice);   // start game
+        std::cout << std::endl;
+
+        // check if user wants to play again
+        char playAgain {};
+        std::cout << "Would you like to play again?([Y]es or [N]o):";
+        std::cin >> playAgain;
+        if (playAgain == 'N' || playAgain == 'n') {
+            break;
+        }
+
+    }
     return 0;
 }
