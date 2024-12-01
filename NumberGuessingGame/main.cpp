@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 
 std::string_view getLevel(int level)
 {
@@ -33,22 +34,22 @@ int getUserGuess()
 
 void guessingGame(int level)
 {
+    std::srand(std::time(nullptr));     // use current time as seed for random number generation
     int guess {};
-    int randomNumber { std::rand() % 101 };
+    int randomNumber { 1 + (std::rand() % 100) };
     int count {0};           // to keep track of user's guess
-    bool gameIsOn {true};
+    bool hasWon {false};    // flag to check to 
     int numberOfTries {getNumberOfTries(level)};
-    std::cout << "Great! You have selected the " << getLevel(level) << "difficulty level.\n";
+    std::cout << "Great! You have selected the " << getLevel(level) << " difficulty level.\n";
     std::cout << "Let's start the game!\n";
     std::cout << std::endl;
 
-    while (gameIsOn &&numberOfTries != 0)
+    while (!hasWon &&numberOfTries != 0)
     {   
         guess = getUserGuess();
         ++count;
         if (guess == randomNumber){
-            std::cout << "Congratulations! You guessed the correct number in " << count << " attempts.\n";
-            gameIsOn = false;
+            hasWon = true;
         }
         else if (guess < randomNumber){
             std::cout << "Incorrect! The number is greater than " << guess << ".\n";
@@ -58,6 +59,14 @@ void guessingGame(int level)
             std::cout << "Incorrect! The number is less than " << guess << ".\n";
             numberOfTries--;
         }
+    }
+
+    if (hasWon){
+        std::cout << "Congratulations! You guessed the correct number in " << count << " attempts.\n";
+    }
+    else {
+        std::cout << "You failed after " << count << " tries.\n";
+        std::cout << "The correct number is " << randomNumber << '\n';
     }
 }
 
