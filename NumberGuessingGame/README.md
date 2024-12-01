@@ -2,6 +2,7 @@
 
 This is a simple CLI-based game, where the program generates a random number and the user has to guess the number.
 The user will be given a limited number of chances to guess the number. If the user guesses the number correctly, the game will end, and the user will win. Otherwise, the game will continue until the user runs out of chances.
+[Link](https://roadmap.sh/projects/number-guessing-game) to the project page.
 
 Here is a sample output of the game:
 <pre>
@@ -32,4 +33,4 @@ Enter your guess: 30
 Congratulations! You guessed the correct number in 4 attempts.
 </pre>
 
-[Link](https://roadmap.sh/projects/number-guessing-game "Number Guessing Game") to the project page.
+
