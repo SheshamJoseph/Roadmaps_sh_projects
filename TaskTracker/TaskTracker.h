@@ -1,12 +1,14 @@
 #ifndef TASK_TRACKER_H
 #define TASK_TRACKER_H
 
+#include <ctime>
+
 struct Task {
     int id {};
     std::string description {};
     std::string status {};
-    int createdAt {};
-    int modifiedAt {};
+    std::time_t createdAt {};
+    std::time_t modifiedAt {};
 };
 
 void displayHelp();
