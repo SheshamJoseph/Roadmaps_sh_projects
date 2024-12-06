@@ -114,14 +114,6 @@ void addTask(const std::string& description) {
 
 void updateTask(int id, const std::string& description)
 {
-    // for (auto task : tasks)
-    // {
-    //     if (task.id == id) {
-    //         task.description = description;
-    //         std::cout << "Successfully cahnged description of task #" << id << '\n';
-    //         break;
-    //     }
-    // }
     auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
         return t.id == id;
     }) };
@@ -139,7 +131,19 @@ void updateTask(int id, const std::string& description)
 
 void deleteTask(int id)
 {
-    std::cout << "Task with id(" << id << ") has been deleted..\n";
+    auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
+        return t.id == id;
+    }) };
+    if(found == tasks.end()) 
+    {
+        std::cout << "Task with id #" << id << " does not exist.\n";
+    }
+    else 
+    {
+        tasks.erase(found);
+        std::cout << "Task with id(" << id << ") has been deleted..\n";
+    }
+    listTasks();
 }
 
 void markAsDone(int id)
