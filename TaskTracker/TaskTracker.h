@@ -33,5 +33,7 @@ void listTasksByStatus(Status status);
 std::string formatTime(std::time_t time);
 std::string statusToString(Status status);
 Status stringToStatus(const std::string& status);
+void displayTitleRow();
+void printTask(Task task);
 
 #endif // TASK_TRACKER_H

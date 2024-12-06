@@ -38,6 +38,11 @@ std::vector<Task> tasks {
     },
 };
 
+const int iDWidth (5);
+const int descriptionWidth {50};
+const int timeWidth {20};
+const int statusWidth (12);
+const char separator = ' ';
 
 int main(int argc, char* argv[]) 
 {
@@ -73,8 +78,9 @@ int main(int argc, char* argv[])
                 try {
                     status = stringToStatus(static_cast<std::string>(argv[2]));
                     // Implement logic for listing tasks by status
+                    listTasksByStatus(status);
                 } catch (const std::invalid_argument& e) {
-                    std::cerr << "Invalid status: " << status << "\n";
+                    std::cerr << "Invalid status: \"" << status << "\". Should be either ['done', 'in-progress', or 'todo']\n";
                 }
             }
             else {
@@ -157,34 +163,43 @@ void markAsInProgress(int id)
 }
 
 void listTasks() {
-    int iDWidth (5);
-    int descriptionWidth {50};
-    int timeWidth {20};
-    int statusWidth (12);
-    const char separator = ' ';
 
-    std::cout << std::left << std::setw(iDWidth) << std::setfill(separator) << "ID";
-    std::cout << std::left << std::setw(descriptionWidth) << std::setfill(separator) << "Description";
-    std::cout << std::left << std::setw(statusWidth) << std::setfill(separator) << "Status";
-    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << "Created At";
-    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << "Modified At";
-    std::cout << std::endl;
-
+    displayTitleRow();
     for (const auto& task: tasks)
     {
-        std::cout << std::left << std::setw(iDWidth) << std::setfill(separator) << task.id;
-        std::cout << std::left << std::setw(descriptionWidth) << std::setfill(separator) << task.description;
-        std::cout << std::left << std::setw(statusWidth) << std::setfill(separator) << task.status;
-        std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.createdAt;
-        std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.modifiedAt;
-        std::cout << std::endl;
-
+        printTask(task);
     }
 }
 
-void listTasksByStatus(std::string_view flag)
+void listTasksByStatus(Status status)
 {
-    std::cout << "Listing all stored tasks\n";
+    displayTitleRow();
+    switch (status)
+    {
+        case Status::done:
+            for(const auto& task: tasks)
+            {
+                if(task.status == Status::done)
+                    printTask(task);
+            }
+            break;
+
+        case Status::in_progress:
+            for(const auto& task: tasks)
+            {
+                if(task.status == Status::in_progress)
+                    printTask(task);
+            }
+            break;
+
+        case Status::todo:
+            for(const auto& task: tasks)
+            {
+                if(task.status == Status::todo)
+                    printTask(task);
+            }
+            break;
+    }
 }
 
 std::string statusToString(Status status) 
@@ -205,4 +220,22 @@ Status stringToStatus(const std::string& status){
     throw std::invalid_argument("Invalid status");
 }
 
+void displayTitleRow() 
+{
+    std::cout << std::left << std::setw(iDWidth) << std::setfill(separator) << "ID";
+    std::cout << std::left << std::setw(descriptionWidth) << std::setfill(separator) << "Description";
+    std::cout << std::left << std::setw(statusWidth) << std::setfill(separator) << "Status";
+    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << "Created At";
+    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << "Modified At";
+    std::cout << std::endl;
+}
 
+void printTask(Task task)
+{
+    std::cout << std::left << std::setw(iDWidth) << std::setfill(separator) << task.id;
+    std::cout << std::left << std::setw(descriptionWidth) << std::setfill(separator) << task.description;
+    std::cout << std::left << std::setw(statusWidth) << std::setfill(separator) << task.status;
+    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.createdAt;
+    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.modifiedAt;
+    std::cout << std::endl;
+}
