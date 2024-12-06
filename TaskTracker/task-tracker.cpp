@@ -154,12 +154,33 @@ void deleteTask(int id)
 
 void markAsDone(int id)
 {
-    std::cout << "Task with id(" << id << ") has been marked as done..\n";
+    auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
+        return t.id == id;
+    }) };
+    if(found == tasks.end()) 
+    {
+        std::cout << "Task with id #" << id << " does not exist.\n";
+    }
+    else
+    {
+        found->status = Status::done;
+    }
 }
 
 void markAsInProgress(int id)
 {
-    std::cout << "Task with id(" << id << ") has been marked as in progress..\n";
+    auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
+        return t.id == id;
+    }) };
+    if(found == tasks.end()) 
+    {
+        std::cout << "Task with id #" << id << " does not exist.\n";
+    }
+    else
+    {
+        found->status = Status::in_progress;
+    }
+    listTasks();
 }
 
 void listTasks() {
