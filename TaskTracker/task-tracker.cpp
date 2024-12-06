@@ -1,12 +1,18 @@
-#include <iostream>
 #include "TaskTracker.h"
+#include <iostream>
+#include <vector>
+#include <chrono>
+#include <ctime>
+
 // #include <unistd.h>     // for command line options parsing
 
-enum Status{
-    done,
-    in_progress,
-    todo,
-};
+std::string formatTime(std::time_t time) {
+    char buffer[100];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::localtime(&time));
+    return std::string(buffer);
+}
+
+std::vector<Task> tasks {};
 
 
 int main(int argc, char* argv[]) 
@@ -39,8 +45,13 @@ int main(int argc, char* argv[])
         else if (option == "list"){
             // check if 3 arguements were passed into
             if (argc > 2) { 
-                std::string status { static_cast<std::string>(argv[2])};
-                listTasksByStatus(status); 
+                Status status {};
+                try {
+                    status = stringToStatus(static_cast<std::string>(argv[2]));
+                    // Implement logic for listing tasks by status
+                } catch (const std::invalid_argument& e) {
+                    std::cerr << "Invalid status: " << status << "\n";
+                }
             }
             else {
                 listTasks();
@@ -53,14 +64,29 @@ int main(int argc, char* argv[])
 // ======== Helper functions =========
 void displayHelp()
 {
-    std::cout << "Displays help message...\n";
+    std::cout << "Usage:\n";
+    std::cout << "  add <description>          - Add a new task\n";
+    std::cout << "  update <id> <description>  - Update a task description\n";
+    std::cout << "  delete <id>                - Delete a task\n";
+    std::cout << "  mark-done <id>             - Mark a task as done\n";
+    std::cout << "  mark-in-progress <id>      - Mark a task as in-progress\n";
+    std::cout << "  list                       - List all tasks\n";
+    std::cout << "  list <status>              - List tasks by status (todo, done, in-progress)\n";
 }
 
-void addTask(std::string_view description) {
-    std::cout << "New task added: " << description << ".\n";        // just a line to test
+void addTask(const std::string& description) {
+    Task newTask {
+        static_cast<int>(tasks.size()),
+        description,
+        Status::todo,                       // default to todo
+        formatTime( std::time(nullptr) ),
+        formatTime( std::time(nullptr) ),   // modified time same as created time
+    };
+    
+    tasks.push_back(newTask);
 }
 
-void updateTask(int id, std::string_view description)
+void updateTask(int id, const std::string& description)
 {
     std::cout << "Task with id(" << id << ") has had it\'s description updated to \" "<< description << "\".\n";
 }
@@ -88,3 +114,23 @@ void listTasksByStatus(std::string_view flag)
 {
     std::cout << "Listing all stored tasks\n";
 }
+
+std::string statusToString(Status status) 
+{
+    switch (status)
+    {
+        case Status::done: return "done";
+        case Status::in_progress: return "in-progress";
+        case Status::todo: return "todo";
+    }
+    return "unknown";
+}
+
+Status stringToStatus(const std::string& status){
+    if (status == "done") return done;
+    if (status == "in-progress") return in_progress;
+    if (status == "todo") return todo;
+    throw std::invalid_argument("Invalid status");
+}
+
+
