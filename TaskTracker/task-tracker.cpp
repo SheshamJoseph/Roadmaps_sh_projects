@@ -3,6 +3,8 @@
 #include <vector>
 #include <chrono>
 #include <ctime>
+#include <iomanip>          // for formatting the tasks list display
+#include <algorithm>
 
 // #include <unistd.h>     // for command line options parsing
 
@@ -12,7 +14,29 @@ std::string formatTime(std::time_t time) {
     return std::string(buffer);
 }
 
-std::vector<Task> tasks {};
+std::vector<Task> tasks {
+    {
+        0,
+        "task1",
+        Status::todo,                       // default to todo
+        formatTime( std::time(nullptr) ),
+        formatTime( std::time(nullptr) )
+    },
+    {
+        1,
+        "task2",
+        Status::todo,                       // default to todo
+        formatTime( std::time(nullptr) ),
+        formatTime( std::time(nullptr) )
+    },
+    {
+        2,
+        "task3",
+        Status::todo,                       // default to todo
+        formatTime( std::time(nullptr) ),
+        formatTime( std::time(nullptr) )
+    },
+};
 
 
 int main(int argc, char* argv[]) 
@@ -84,11 +108,33 @@ void addTask(const std::string& description) {
     };
     
     tasks.push_back(newTask);
+    std::cout << "New task with id #" << newTask.id << " added to tasks list.\n";
+    listTasks();
 }
 
 void updateTask(int id, const std::string& description)
 {
-    std::cout << "Task with id(" << id << ") has had it\'s description updated to \" "<< description << "\".\n";
+    // for (auto task : tasks)
+    // {
+    //     if (task.id == id) {
+    //         task.description = description;
+    //         std::cout << "Successfully cahnged description of task #" << id << '\n';
+    //         break;
+    //     }
+    // }
+    auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
+        return t.id == id;
+    }) };
+    if (found == tasks.end())
+    {
+        std::cout << "Task with id #" << id << " does not exist.\n";
+    }
+    else {
+        found->description = description;
+        std::cout << "Successfully changed description of task #" << id << ".\n";
+    }
+
+    listTasks();
 }
 
 void deleteTask(int id)
@@ -107,7 +153,29 @@ void markAsInProgress(int id)
 }
 
 void listTasks() {
-    std::cout << "Listing all stored tasks\n";
+    int iDWidth (5);
+    int descriptionWidth {50};
+    int timeWidth {20};
+    int statusWidth (12);
+    const char separator = ' ';
+
+    std::cout << std::left << std::setw(iDWidth) << std::setfill(separator) << "ID";
+    std::cout << std::left << std::setw(descriptionWidth) << std::setfill(separator) << "Description";
+    std::cout << std::left << std::setw(statusWidth) << std::setfill(separator) << "Status";
+    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << "Created At";
+    std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << "Modified At";
+    std::cout << std::endl;
+
+    for (const auto& task: tasks)
+    {
+        std::cout << std::left << std::setw(iDWidth) << std::setfill(separator) << task.id;
+        std::cout << std::left << std::setw(descriptionWidth) << std::setfill(separator) << task.description;
+        std::cout << std::left << std::setw(statusWidth) << std::setfill(separator) << task.status;
+        std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.createdAt;
+        std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.modifiedAt;
+        std::cout << std::endl;
+
+    }
 }
 
 void listTasksByStatus(std::string_view flag)
