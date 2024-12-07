@@ -5,10 +5,8 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>          // for formatting the tasks list display
-#include <algorithm>        // 
+#include <algorithm>        // for std::find and std::find_if
 #include <fstream>
-
-// #include <unistd.h>     // for command line options parsing
 
 std::string formatTime(std::time_t time) {
     char buffer[100];
@@ -16,12 +14,14 @@ std::string formatTime(std::time_t time) {
     return std::string(buffer);
 }
 
-
+// constants for formatting tasks output
 const int iDWidth (5);
 const int descriptionWidth {50};
 const int timeWidth {20};
 const int statusWidth (12);
 const char separator = ' ';
+
+
 std::string file {"tasks.json"};
 
 int main(int argc, char* argv[]) 
@@ -108,7 +108,6 @@ void addTask(const std::string& description) {
     tasks.push_back(newTask);
     std::cout << "New task with id #" << newTask.id << " added to tasks list.\n";
     saveTasksToFile(tasks, file);
-    // listTasks();
 }
 
 void updateTask(int id, const std::string& description)
@@ -127,7 +126,6 @@ void updateTask(int id, const std::string& description)
         std::cout << "Successfully changed description of task #" << id << ".\n";
     }
     saveTasksToFile(tasks, file);
-    // listTasks();
 }
 
 void deleteTask(int id)
@@ -183,7 +181,6 @@ void markAsInProgress(int id)
         found->modifiedAt = formatTime( std::time(nullptr) );
     }
     saveTasksToFile(tasks, file);
-    // listTasks();
 }
 
 void listTasks() {
@@ -285,7 +282,7 @@ Task jsonToTask(const std::string& json)
     Task task {};
 
     auto findValue = [&](const std::string& key) {
-        size_t start = json.find("\"" + key + "\":") + key.length() + 4;
+        size_t start = json.find("\"" + key + "\":") + key.length() + 4;    // for ["key": "value"] pair, moves over ["key": ] to get starting index of ["value"]
         size_t end = json.find(",", start);
         if (end == std::string::npos) {
             end = json.find("}", start);
@@ -293,7 +290,7 @@ Task jsonToTask(const std::string& json)
         return json.substr(start, end - start);
     };
 
-    task.id = std::stoi(findValue("id").substr(1, findValue("id").size()-2));
+    task.id = std::stoi(findValue("id").substr(1, findValue("id").size()-2));    // Remove quotes
     task.description = findValue("description").substr(1, findValue("description").size() - 2); // Remove quotes
     std::string temp = findValue("status").substr(1, findValue("status").size() - 2);               // Remove quotes
     task.status = stringToStatus(temp);     // temp holds string value of 'status' before being converted to type 'Status'
@@ -308,7 +305,7 @@ std::vector<Task> readTasksFromFile(const std::string& file)
     std::ifstream inFile {file};
     if(!inFile)
     {
-        std::cerr << "Error!!! Can't open file for reading\n";
+        // std::cerr << "Error!!! \"task.json\" file does not exist.\n";
         return {};
     } 
 
