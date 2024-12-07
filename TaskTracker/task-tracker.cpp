@@ -67,6 +67,10 @@ int main(int argc, char* argv[])
                 listTasks();
             }
         }
+        else {
+            std::cerr << "Invalid command: \"" << argv[1] << "\".\n";
+            displayHelp();
+        }
     }
     return 0;
 }
