@@ -5,7 +5,7 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>          // for formatting the tasks list display
-#include <algorithm>
+#include <algorithm>        // 
 #include <fstream>
 
 // #include <unistd.h>     // for command line options parsing
@@ -119,6 +119,7 @@ void updateTask(int id, const std::string& description)
     }
     else {
         found->description = description;
+        found->modifiedAt = formatTime( std::time(nullptr) );
         std::cout << "Successfully changed description of task #" << id << ".\n";
     }
     saveTasksToFile(tasks, file);
@@ -157,6 +158,7 @@ void markAsDone(int id)
     else
     {
         found->status = Status::done;
+        found->modifiedAt = formatTime( std::time(nullptr) );
     }
     saveTasksToFile(tasks, "tasks.json");
 }
@@ -174,6 +176,7 @@ void markAsInProgress(int id)
     else
     {
         found->status = Status::in_progress;
+        found->modifiedAt = formatTime( std::time(nullptr) );
     }
     saveTasksToFile(tasks, file);
     // listTasks();
