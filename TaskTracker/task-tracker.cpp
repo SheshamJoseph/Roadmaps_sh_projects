@@ -1,10 +1,12 @@
 #include "TaskTracker.h"
+#include "Json.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
 #include <ctime>
 #include <iomanip>          // for formatting the tasks list display
 #include <algorithm>
+#include <fstream>
 
 // #include <unistd.h>     // for command line options parsing
 
@@ -14,35 +16,13 @@ std::string formatTime(std::time_t time) {
     return std::string(buffer);
 }
 
-std::vector<Task> tasks {
-    {
-        0,
-        "task1",
-        Status::todo,                       // default to todo
-        formatTime( std::time(nullptr) ),
-        formatTime( std::time(nullptr) )
-    },
-    {
-        1,
-        "task2",
-        Status::todo,                       // default to todo
-        formatTime( std::time(nullptr) ),
-        formatTime( std::time(nullptr) )
-    },
-    {
-        2,
-        "task3",
-        Status::todo,                       // default to todo
-        formatTime( std::time(nullptr) ),
-        formatTime( std::time(nullptr) )
-    },
-};
 
 const int iDWidth (5);
 const int descriptionWidth {50};
 const int timeWidth {20};
 const int statusWidth (12);
 const char separator = ' ';
+std::string file {"tasks.json"};
 
 int main(int argc, char* argv[]) 
 {
@@ -105,8 +85,16 @@ void displayHelp()
 }
 
 void addTask(const std::string& description) {
+    std::vector<Task> tasks { readTasksFromFile(file) };
+    int newId {};
+    if (tasks.empty()){
+        newId = 0;
+    }
+    else {
+        newId = tasks[tasks.size()-1].id + 1;
+    }
     Task newTask {
-        static_cast<int>(tasks.size()),
+        newId,
         description,
         Status::todo,                       // default to todo
         formatTime( std::time(nullptr) ),
@@ -115,11 +103,13 @@ void addTask(const std::string& description) {
     
     tasks.push_back(newTask);
     std::cout << "New task with id #" << newTask.id << " added to tasks list.\n";
-    listTasks();
+    saveTasksToFile(tasks, file);
+    // listTasks();
 }
 
 void updateTask(int id, const std::string& description)
 {
+    std::vector<Task> tasks { readTasksFromFile(file) };
     auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
         return t.id == id;
     }) };
@@ -131,12 +121,13 @@ void updateTask(int id, const std::string& description)
         found->description = description;
         std::cout << "Successfully changed description of task #" << id << ".\n";
     }
-
-    listTasks();
+    saveTasksToFile(tasks, file);
+    // listTasks();
 }
 
 void deleteTask(int id)
 {
+    std::vector<Task> tasks { readTasksFromFile(file) };
     auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
         return t.id == id;
     }) };
@@ -149,11 +140,13 @@ void deleteTask(int id)
         tasks.erase(found);
         std::cout << "Task with id(" << id << ") has been deleted..\n";
     }
-    listTasks();
+    saveTasksToFile(tasks, file);
+    // listTasks();
 }
 
 void markAsDone(int id)
 {
+    std::vector<Task> tasks { readTasksFromFile(file) };
     auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
         return t.id == id;
     }) };
@@ -165,10 +158,12 @@ void markAsDone(int id)
     {
         found->status = Status::done;
     }
+    saveTasksToFile(tasks, "tasks.json");
 }
 
 void markAsInProgress(int id)
 {
+    std::vector<Task> tasks { readTasksFromFile(file) };
     auto found { std::find_if(tasks.begin(), tasks.end(), [id](Task t){
         return t.id == id;
     }) };
@@ -180,11 +175,13 @@ void markAsInProgress(int id)
     {
         found->status = Status::in_progress;
     }
-    listTasks();
+    saveTasksToFile(tasks, file);
+    // listTasks();
 }
 
 void listTasks() {
 
+    std::vector<Task> tasks { readTasksFromFile("tasks.json") };
     displayTitleRow();
     for (const auto& task: tasks)
     {
@@ -194,6 +191,7 @@ void listTasks() {
 
 void listTasksByStatus(Status status)
 {
+    std::vector<Task> tasks { readTasksFromFile("tasks.json") };
     displayTitleRow();
     switch (status)
     {
@@ -259,4 +257,91 @@ void printTask(Task task)
     std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.createdAt;
     std::cout << std::left << std::setw(timeWidth) << std::setfill(separator) << task.modifiedAt;
     std::cout << std::endl;
+}
+
+
+std::string taskToJson(const Task& task)
+{
+    std::string json = "{";
+    json += "\"id\": \"" + std::to_string(task.id) + "\", ";
+    json += "\"description\": \"" + task.description + "\", ";
+    json += "\"status\": \"" + statusToString(task.status) + "\", ";
+    json += "\"createdAt\": \"" + task.createdAt + "\", ";
+    json += "\"modifiedAt\": \"" + task.modifiedAt + "\",";
+    json += "}";
+
+    return json;
+}
+
+Task jsonToTask(const std::string& json)
+{
+    Task task {};
+
+    auto findValue = [&](const std::string& key) {
+        size_t start = json.find("\"" + key + "\":") + key.length() + 4;
+        size_t end = json.find(",", start);
+        if (end == std::string::npos) {
+            end = json.find("}", start);
+        }
+        return json.substr(start, end - start);
+    };
+
+    task.id = std::stoi(findValue("id").substr(1, findValue("id").size()-2));
+    task.description = findValue("description").substr(1, findValue("description").size() - 2); // Remove quotes
+    std::string temp = findValue("status").substr(1, findValue("status").size() - 2);               // Remove quotes
+    task.status = stringToStatus(temp);     // temp holds string value of 'status' before being converted to type 'Status'
+    task.createdAt = findValue("createdAt").substr(1, findValue("createdAt").size() - 2);
+    task.modifiedAt = findValue("modifiedAt").substr(1, findValue("modifiedAt").size() - 2);
+
+    return task;
+}
+
+std::vector<Task> readTasksFromFile(const std::string& file)
+{
+    std::ifstream inFile {file};
+    if(!inFile)
+    {
+        std::cerr << "Error!!! Can't open file for reading\n";
+        return {};
+    } 
+
+    std::vector<Task> tasks {};
+    std::string line {};
+    while(std::getline(inFile, line))
+    {
+        if(line.find("{") != std::string::npos)
+        {
+            std::string taskJson {};
+            do{
+                taskJson += line;
+            } while (line.find("}") == std::string::npos && std::getline(inFile, line));
+
+            tasks.push_back(jsonToTask(taskJson));
+        }
+    }
+    inFile.close();
+    return tasks;
+}
+
+void saveTasksToFile(const std::vector<Task>& tasks, const std::string& file)
+{
+    std::ofstream outFile{file};
+    if(!outFile)
+    {
+        std::cerr << "Error!!! Can't open file for writing\n";
+        return;
+    } 
+
+    outFile << "[\n";
+    for (size_t i=0; i < tasks.size(); ++i)
+    {
+        outFile << taskToJson(tasks[i]);
+        if (i != (tasks.size()-1)) {
+            outFile << ",";
+        }
+        outFile << "\n";
+    }
+    outFile << "]\n";
+    outFile.close();
+
 }
