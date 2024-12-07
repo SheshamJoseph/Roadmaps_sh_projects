@@ -14,16 +14,21 @@ Usage:
   mark-in-progress [id]      - Mark a task as in-progress
   list                       - List all tasks
   list [status]              - List tasks by status (done[0], in-progress[1], todo[2])
+
 $ ./task-tracker add "Buy groceries"
 New task with id #0 added to tasks list.
+
 $ ./task-tracker list
 ID   Description                                       Status      Created At          Modified At         
 0    Buy groceries                                     2           2024-12-07 23:03:10 2024-12-07 23:03:10 
 1    Finish project                                    2           2024-12-07 23:04:16 2024-12-07 23:04:16 
 2    Fix bird house                                    2           2024-12-07 23:05:24 2024-12-07 23:05:24
+
 $ ./task-tracker update 1 "Finish task-cli project"
 Successfully changed description of task #1.
+
 $ ./task-tracker mark-done 2
+
 $ ./task-tracker list
 ID   Description                                       Status      Created At          Modified At         
 0    Buy groceries                                     2           2024-12-07 23:03:10 2024-12-07 23:03:10 
