@@ -100,7 +100,7 @@ void addTask(const std::string& description) {
     Task newTask {
         newId,
         description,
-        Status::todo,                       // default to todo
+        statusToString(Status::todo),                       // default to todo
         formatTime( std::time(nullptr) ),
         formatTime( std::time(nullptr) ),   // modified time same as created time
     };
@@ -159,7 +159,7 @@ void markAsDone(int id)
     }
     else
     {
-        found->status = Status::done;
+        found->status = statusToString(Status::done);
         found->modifiedAt = formatTime( std::time(nullptr) );
     }
     saveTasksToFile(tasks, "tasks.json");
@@ -177,7 +177,7 @@ void markAsInProgress(int id)
     }
     else
     {
-        found->status = Status::in_progress;
+        found->status = statusToString(Status::in_progress);
         found->modifiedAt = formatTime( std::time(nullptr) );
     }
     saveTasksToFile(tasks, file);
@@ -202,7 +202,7 @@ void listTasksByStatus(Status status)
         case Status::done:
             for(const auto& task: tasks)
             {
-                if(task.status == Status::done)
+                if(task.status == statusToString(Status::done))
                     printTask(task);
             }
             break;
@@ -210,7 +210,7 @@ void listTasksByStatus(Status status)
         case Status::in_progress:
             for(const auto& task: tasks)
             {
-                if(task.status == Status::in_progress)
+                if(task.status == statusToString(Status::in_progress))
                     printTask(task);
             }
             break;
@@ -218,7 +218,7 @@ void listTasksByStatus(Status status)
         case Status::todo:
             for(const auto& task: tasks)
             {
-                if(task.status == Status::todo)
+                if(task.status == statusToString(Status::todo))
                     printTask(task);
             }
             break;
@@ -269,7 +269,7 @@ std::string taskToJson(const Task& task)
     std::string json = "{";
     json += "\"id\": \"" + std::to_string(task.id) + "\", ";
     json += "\"description\": \"" + task.description + "\", ";
-    json += "\"status\": \"" + statusToString(task.status) + "\", ";
+    json += "\"status\": \"" + task.status + "\", ";
     json += "\"createdAt\": \"" + task.createdAt + "\", ";
     json += "\"modifiedAt\": \"" + task.modifiedAt + "\",";
     json += "}";
@@ -292,8 +292,8 @@ Task jsonToTask(const std::string& json)
 
     task.id = std::stoi(findValue("id").substr(1, findValue("id").size()-2));    // Remove quotes
     task.description = findValue("description").substr(1, findValue("description").size() - 2); // Remove quotes
-    std::string temp = findValue("status").substr(1, findValue("status").size() - 2);               // Remove quotes
-    task.status = stringToStatus(temp);     // temp holds string value of 'status' before being converted to type 'Status'
+    task.status = findValue("status").substr(1, findValue("status").size() - 2);               // Remove quotes
+    // task.status = stringToStatus(temp);     // temp holds string value of 'status' before being converted to type 'Status'
     task.createdAt = findValue("createdAt").substr(1, findValue("createdAt").size() - 2);
     task.modifiedAt = findValue("modifiedAt").substr(1, findValue("modifiedAt").size() - 2);
 
