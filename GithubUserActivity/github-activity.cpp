@@ -15,16 +15,14 @@ int main(int argc, char const *argv[])
 
     std::string username { argv[1] };
     std::string githubResponse = fetchGithubActivity(username);
-    std::ofstream outfile { "output.json" };
-
-    if (!outfile)
+    if (!githubResponse.empty())
     {
-        std::cerr << "Error in opening file\n";
-        return 1;
+        displayActivities(githubResponse);
     }
-
-    outfile << githubResponse;
-    outfile.close();
+    // else 
+    // {
+    //     std::cerr << "Error in getting response.\n";
+    // }
 
     return 0;
 }

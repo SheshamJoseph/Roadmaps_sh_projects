@@ -2,6 +2,9 @@
 #include <curl/curl.h>
 #include <string>
 #include <iostream>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 // Callback function to write data to a string
 static size_t writeCallback(void *contents, size_t size, size_t nmemb, std::string *userp) 
@@ -53,4 +56,22 @@ std::string fetchGithubActivity(std::string userName)
     curl_slist_free_all(headers);
 
     return readBuffer;
+}
+
+
+void displayActivities(const std::string& userJson)
+{
+    try
+    {
+        auto events = json::parse(userJson);
+        for(const auto& event: events)
+        {
+            std::cout << "Event type: " << event["type"] << ".\n";
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
 }
