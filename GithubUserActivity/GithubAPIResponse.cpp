@@ -66,7 +66,7 @@ void displayActivities(const std::string& userJson)
         auto events = json::parse(userJson);
         for(const auto& event: events)
         {
-            std::cout << "Event type: " << event["type"] << ".\n";
+            parseJsonEvent(event);
         }
     }
     catch(const std::exception& e)
@@ -74,4 +74,50 @@ void displayActivities(const std::string& userJson)
         std::cerr << e.what() << '\n';
     }
     
+}
+
+void parseJsonEvent(const json& event)
+{
+    try 
+    {
+        std::string eventType = event["type"];
+        std::string repoName = event["repo"]["name"];
+        if (eventType == "CommitCommentEvent")
+        {
+            std::cout << "Made a commit comment on " << repoName << ".\n";
+        }
+        else if (eventType == "CreateEvent")
+        {
+            std::cout << "Created a new repo " << repoName << ".\n";
+        }
+        else if (eventType == "PushEvent")
+        {
+            int commitCount = event["payload"]["size"];
+            std::cout << "Pushed " << commitCount << " commits to " << repoName << ".\n";
+        }
+        else if (eventType == "DeleteEvent")
+        {
+            std::string refType = event["payload"]["ref_type"];
+            std::string ref = event["payload"]["ref"];
+            std::cout << "Deleted " << refType << " " << ref << " in " << repoName << ".\n";
+        }
+        else if (eventType == "IssuesEvent")
+        {
+            std::string action = event["payload"]["action"];
+            std::cout << "Issue " << action << " in " << repoName << ".\n";
+        }
+        else if (eventType == "PullRequestEvent")
+        {
+            std::string action = event["payload"]["action"];
+            std::cout << "Pull request " << action << " in " << repoName << ".\n";
+        }
+        else
+        {
+            std::cout << "Unhandled event type: " << eventType << ".\n";
+        }
+    } 
+    catch (const json::exception& e)
+    {
+        std::cerr << "Error parsing event: " << e.what();
+    }
 }

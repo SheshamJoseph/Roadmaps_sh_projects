@@ -19,10 +19,11 @@ int main(int argc, char const *argv[])
     {
         displayActivities(githubResponse);
     }
-    // else 
-    // {
-    //     std::cerr << "Error in getting response.\n";
-    // }
+    else 
+    {
+        std::cerr << "No response.\n";
+        std::cerr << "Probable cause: Invalide username.\n";
+    }
 
     return 0;
 }
