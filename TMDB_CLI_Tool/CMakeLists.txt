@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.10)
 project(TMDB_CLI_Tool)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Set default build type to Debug
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 #include directory for header files
 include_directories(include)
@@ -24,3 +31,8 @@ target_link_libraries(
     CURL::libcurl
     nlohmann_json::nlohmann_json
 )
+
+# Add debug flags explicitly if needed
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+endif()

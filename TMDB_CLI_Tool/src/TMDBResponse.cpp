@@ -24,7 +24,7 @@ void TMDBResponse::parseResponse()
 {
     try{
         auto jsonResponse = json::parse( m_apiResponse );
-        for (const auto& movie: jsonResponse)
+        for (const auto& movie: jsonResponse["results"])
         {
             std::cout << "Movie Title: " << movie["title"] << ".\n";
             std::cout << "Overview: " << movie["overview"] << ".\n";

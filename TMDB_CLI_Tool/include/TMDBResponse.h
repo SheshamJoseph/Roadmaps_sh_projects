@@ -10,7 +10,7 @@ private:
     std::string m_type {};
 public:
     TMDBResponse(const std::string& type);
-    void parseResponse(const std::string& response);
+    void parseResponse();
     void getMovieData();
 };
 
